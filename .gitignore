@@ -2,3 +2,4 @@ node_modules
 /0-scraping/data
 /1-extract/data
 /2-structure/data
+/3-index/data.json
