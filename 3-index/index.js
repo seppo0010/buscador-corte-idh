@@ -5,7 +5,7 @@ const tqdm = require('tqdm');
 const MiniSearch = require('minisearch')
 
 const miniSearch = new MiniSearch({
-  idField: 'caso',
+  idField: 'filename',
   fields: ['caso', 'data'],
   storeFields: ['caso', 'data', 'fecha', 'filename'],
 })

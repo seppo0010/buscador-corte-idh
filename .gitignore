@@ -3,3 +3,4 @@ node_modules
 /1-extract/data
 /2-structure/data
 /3-index/data.json
+/4-web/public/data.json
