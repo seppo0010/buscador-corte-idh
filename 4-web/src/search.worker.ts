@@ -26,6 +26,7 @@ export async function init () {
         fields: ['caso', 'data'],
         storeFields: ['caso', 'data', 'fecha', 'filename'],
         searchOptions: {
+          boost: { caso: 10 },
           combineWith: 'AND',
           prefix: true
         }
