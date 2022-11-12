@@ -1,2 +1,4 @@
 node_modules
-/scraping/data
+/0-scraping/data
+/1-extract/data
+/2-structure/data
