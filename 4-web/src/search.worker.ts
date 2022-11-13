@@ -1,5 +1,6 @@
 import fetchProgress from 'fetch-progress'
 import MiniSearch from 'minisearch'
+import pako from 'pako'
 
 let index: MiniSearch
 let criteria = ''
@@ -20,9 +21,9 @@ const doSearch = () => {
 export async function init () {
   let contentLength = -1;
   // for some reason, mf react server does not return content-length on static GET
-  fetch(`${process.env.PUBLIC_URL}/data.json`, { method: 'HEAD' })
+  fetch(`${process.env.PUBLIC_URL}/data.json.gz`, { method: 'HEAD' })
     .then((res) => contentLength = parseInt(res.headers.get('content-length') || '-1', 10))
-  fetch(`${process.env.PUBLIC_URL}/data.json`)
+  fetch(`${process.env.PUBLIC_URL}/data.json.gz`)
     .then(fetchProgress({
       onProgress({ transferred } ) {
         if (contentLength !== -1) {
@@ -33,10 +34,10 @@ export async function init () {
         // TODO: something
       },
     }))
-    .then((res) => res.text())
+    .then((res) => res.arrayBuffer())
     // minisearch configuration must match 3-index's
     .then((data) => {
-      index = MiniSearch.loadJSON(data, {
+      index = MiniSearch.loadJSON(new TextDecoder().decode(pako.inflate(data)), {
         idField: 'caso',
         fields: ['caso', 'data'],
         storeFields: ['caso', 'data', 'fecha', 'filename'],

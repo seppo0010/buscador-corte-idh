@@ -68,7 +68,7 @@ function App() {
           Interamericana de Derechos Humanos.
         </p>
         {!ready && <>
-          Cargando... {progress}
+          Cargando...
           <LinearProgress variant={'determinate'} value={100 * (progress || 0)} />
         </>}
         {ready && <label>
