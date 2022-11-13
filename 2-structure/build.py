@@ -1,5 +1,6 @@
 import json
 from glob import glob
+import re
 import os.path
 
 def run():
@@ -67,12 +68,19 @@ def run():
             }[fecha[-2]]
             day = int(fecha[-3])
             fecha = f'{year}-{month:02}-{day:02}'
+
+        articulos = set()
+        for arts in re.findall(r'artículos? ([0-9\. y,]*?) de la Convención Americana', ' '.join(lines)):
+            for art in re.findall(r'([0-9]+(?:\.[0-9]+)?)', arts):
+                articulos.add(int(art.split('.')[0]))
+
         target = os.path.join(file_path, 'data', os.path.basename(filename)[:-4] + '.json')
         with open(target, 'w', encoding='utf-8') as filepointer:
             filepointer.write(json.dumps({
                 'caso': caso,
                 'fecha': fecha,
                 'data': data,
+                'articulos': sorted(articulos),
             }))
 
 run()

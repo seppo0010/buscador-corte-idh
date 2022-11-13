@@ -7,7 +7,7 @@ const MiniSearch = require('minisearch')
 const miniSearch = new MiniSearch({
   idField: 'filename',
   fields: ['caso', 'data'],
-  storeFields: ['caso', 'data', 'fecha', 'filename'],
+  storeFields: ['caso', 'data', 'fecha', 'filename', 'articulos'],
 })
 
 const base = path.join(__dirname, '../2-structure/data')

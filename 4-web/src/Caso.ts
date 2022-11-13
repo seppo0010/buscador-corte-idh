@@ -3,5 +3,6 @@ export default interface Caso {
   data: string;
   fecha: string;
   filename: string;
+  articulos: number[];
   excerpt?: string;
 }

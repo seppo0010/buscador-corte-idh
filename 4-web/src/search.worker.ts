@@ -4,6 +4,7 @@ import pako from 'pako'
 
 let index: MiniSearch
 let criteria = ''
+let articuloFilter: null | number = null
 
 const doSearch = () => {
   if (!index) return
@@ -13,7 +14,10 @@ const doSearch = () => {
     global.self.postMessage(['setSearchResults', []])
     return
   }
-  const results = index.search(criteria)
+  let results = index.search(criteria)
+  if (articuloFilter !== null) {
+    results = results.filter(({ articulos }) => articulos.includes(articuloFilter));
+  }
   global.self.postMessage(['setDidSearch', true])
   global.self.postMessage(['setSearchResults', results.slice(0, 40)])
 }
@@ -40,7 +44,7 @@ export async function init () {
       index = MiniSearch.loadJSON(new TextDecoder().decode(pako.inflate(data)), {
         idField: 'caso',
         fields: ['caso', 'data'],
-        storeFields: ['caso', 'data', 'fecha', 'filename'],
+        storeFields: ['caso', 'data', 'fecha', 'filename', 'articulos'],
         searchOptions: {
           boost: { caso: 10 },
           combineWith: 'AND',
@@ -54,7 +58,8 @@ export async function init () {
     // TODO: handle error
 }
 
-export async function search (searchCriteria: string) {
+export async function search (searchCriteria: string, searchArticuloFilter: number | null) {
   criteria = searchCriteria
+  articuloFilter = searchArticuloFilter
   doSearch()
 }

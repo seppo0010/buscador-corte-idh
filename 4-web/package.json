@@ -52,6 +52,7 @@
   "devDependencies": {
     "@types/pako": "^2.0.0",
     "gh-pages": "^4.0.0",
+    "raw-loader": "^4.0.2",
     "workerize-loader": "^2.0.2"
   }
 }

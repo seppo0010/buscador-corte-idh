@@ -10,6 +10,10 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import LinearProgress from '@mui/material/LinearProgress';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { SelectChangeEvent }  from '@mui/material/Select';
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import cadh from './cadh.txt';
 
 // eslint-disable-next-line import/no-webpack-loader-syntax
 const Worker = require('workerize-loader!./search.worker')
@@ -19,9 +23,12 @@ function App() {
   const [workerInstance, setWorkerInstance] = useState<any | null>(null)
   const [searchResults, setSearchResults] = useState<Caso[]>([])
   const [searchCriteria, setSearchCriteria] = useState('')
+  const [articuloFilter, setArticuloFilter] = useState<null | number>(null)
   const [didSearch, setDidSearch] = useState(false)
   const [ready, setReady] = useState(false)
   const [progress, setProgress] = useState<null | number>(null);
+  const [articulos, setArticulos] = useState<null | Map<number, string>>(null);
+  const [loadingArticulos, setLoadingArticulos] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -57,8 +64,22 @@ function App() {
   }, [loading, workerInstance])
 
   useEffect(() => {
-    workerInstance?.search(searchCriteria)
-  }, [searchCriteria, workerInstance])
+    workerInstance?.search(searchCriteria, articuloFilter)
+  }, [searchCriteria, articuloFilter, workerInstance])
+
+  useEffect(() => {
+    if (loadingArticulos) return;
+    setLoadingArticulos(true);
+    (async () => {
+      const req = await fetch(cadh)
+      const res = await req.text();
+      const map = new Map();
+      for (const [name, id] of Array.from(res.matchAll(/^Artículo ([0-9]+).*/gmd))) {
+        map.set(parseInt(id, 10), name);
+      }
+      setArticulos(map);
+    })();
+  }, [articulos, loadingArticulos]);
 
   return (
     <React.Fragment><CssBaseline /><Container maxWidth="sm"><Box>
@@ -71,12 +92,27 @@ function App() {
           Cargando...
           <LinearProgress variant={'determinate'} value={100 * (progress || 0)} />
         </>}
-        {ready && <label>
+        {ready &&
           <TextField autoFocus={true} type="search" label="Buscar" placeholder={"bulacio"} value={searchCriteria} ref={searchInputRef} onChange={(event) => {
             const value = event.target.value
             setSearchCriteria(value)
           }} fullWidth />
-        </label>}
+        }
+        {ready && articulos &&
+          <Select
+            label="Artículo"
+            onChange={(event: SelectChangeEvent) => {
+              const id = parseInt(event.target.value as string, 10);
+              setArticuloFilter(id === 0 ? null : id);
+            }}
+            value={'' + (articuloFilter || 0)}
+            fullWidth
+          >
+            <MenuItem value={0}>Cualquier artículo</MenuItem>
+            {Array.from(articulos.entries()).map(([id, name]: [number, string]) => (
+              <MenuItem key={id} value={id}>{name}</MenuItem>))}
+          </Select>
+        }
       </header>
       <div>
         {didSearch && searchResults.length > 0 && <>
