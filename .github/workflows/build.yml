@@ -25,6 +25,8 @@ jobs:
         with:
           push: true
           tags: ghcr.io/seppo0010/buscador-corte-idh:latest
+          cache-from: type=registry,ref=ghcr.io/seppo0010/buscador-corte-idh:buildcache
+          cache-to: type=registry,ref=ghcr.io/seppo0010/buscador-corte-idh:buildcache,mode=max
 
   publish:
     needs: [build-docker-image]
