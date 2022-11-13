@@ -15,13 +15,11 @@ const doSearch = () => {
     return
   }
   let searchCriteria = criteria
-  if (criteria[0] === '"' && criteria[criteria.length - 1] === '"') {
-    searchCriteria = criteria.substr(1, criteria.length - 2);
-  }
+  const words = Array.from(criteria.matchAll(/"([^"]+)"|([\w]+)/g)).map(x => (x[1] || x[2]).toLowerCase())
   let results = index.search(searchCriteria, {
     filter: ({ articulos, data }) => (
       (articuloFilter === null || articulos.includes(articuloFilter)) &&
-      (criteria[0] !== '"' || criteria[criteria.length - 1] !== '"' || data.includes(searchCriteria))
+      words.every((word: string) => data.toLowerCase().includes(word))
     ),
   })
   global.self.postMessage(['setDidSearch', true])
