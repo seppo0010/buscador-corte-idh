@@ -64,7 +64,7 @@ function App() {
     <React.Fragment><CssBaseline /><Container maxWidth="sm"><Box>
       <header>
         <p>
-          Bienvenido al Buscador no oficial de Jurisprudencia de la Corte
+          Buscador no oficial de Jurisprudencia de la Corte
           Interamericana de Derechos Humanos.
         </p>
         {!ready && <>
