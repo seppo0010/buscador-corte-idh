@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/buscador-corte-idh/static/css/main.a34b9d66.css",
+    "main.js": "/buscador-corte-idh/static/js/main.25d26019.js",
+    "worker.js": "/buscador-corte-idh/a9055991d410afe0311b.worker.js",
+    "index.html": "/buscador-corte-idh/index.html",
+    "main.a34b9d66.css.map": "/buscador-corte-idh/static/css/main.a34b9d66.css.map",
+    "main.25d26019.js.map": "/buscador-corte-idh/static/js/main.25d26019.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a34b9d66.css",
+    "static/js/main.25d26019.js"
+  ]
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.a34b9d66.css","mappings":"AAAA,MAAQ,gBAAmB,CCA3B,OACI,wBACJ,CACA,IACI,wBACJ","sources":["index.css","Highlighter.css"],"sourcesContent":["#root { padding-top: 20px; }\n",".no-hl {\n    background-color: transparent;\n}\n.hl {\n    background-color: lightyellow;\n}\n"],"names":[],"sourceRoot":""}
