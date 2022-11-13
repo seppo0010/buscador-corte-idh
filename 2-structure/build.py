@@ -14,25 +14,38 @@ def run():
         caso = None
         fecha = None
         line = 0
-        if lines[0].upper().startswith('CORTE INTERAMERICANA DE DERECHOS HUMANOS'.upper()):
-            line += 1
-
-        caso = lines[line].upper()
-        if not caso.startswith('CASO'):
-            caso = f'CASO {caso}'
-        line += 1
-
-        curr = lines[line].upper()
-        while not curr.startswith('SENTENCIA') and not curr.startswith('RESOLUCIÓN'):
-            caso += f' {curr}'
-            curr = lines[line].upper()
-            line += 1
-            if curr == 'Tabla de contenido'.upper():
-                curr = None
+        while True:
+            if (lines[line].upper().startswith('CORTE INTERAMERICANA DE DERECHOS HUMANOS'.upper()) or
+                lines[line].upper().startswith('COUR INTERAMERICAINE DES DROITS DE L\'HOMME'.upper()) or
+                lines[line].upper().startswith('CORTE INTERAMERICANA DE DIREITOS HUMANOS'.upper()) or
+                lines[line].upper().startswith('INTER-AMERICAN COURT OF HUMAN RIGHTS'.upper())
+                    ):
+                line += 1
+            else:
                 break
 
-            if line > 10:
-                raise ValueError(f'Failed to parse {filename}')
+        caso = lines[line].upper()
+        if (
+                not caso.startswith('CASO') and
+                not caso.startswith('OPINIÓN CONSULTIVA') and
+                not caso.startswith('RESOLUCIÓN')
+                ):
+            caso = f'CASO {caso}'
+
+        if caso.startswith('CASO'):
+            line += 1
+
+            curr = lines[line].upper()
+            while not curr.startswith('SENTENCIA') and not curr.startswith('RESOLUCIÓN'):
+                caso += f' {curr}'
+                curr = lines[line].upper()
+                line += 1
+                if curr == 'Tabla de contenido'.upper():
+                    curr = None
+                    break
+
+                if line > 10:
+                    raise ValueError(f'Failed to parse {filename}')
 
         if curr is not None:
             fecha = [el for el in curr.split(' ') if el != 'DE']

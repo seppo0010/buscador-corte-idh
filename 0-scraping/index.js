@@ -1,12 +1,12 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 
-(async () => {
+const runForURL = async (url) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   try {
-    await page.goto('https://www.corteidh.or.cr/casos_sentencias.cfm');
+    await page.goto(url);
     await page.waitForSelector('.search-result a');
 
     await page._client().send("Page.setDownloadBehavior", {
@@ -22,7 +22,11 @@ const puppeteer = require('puppeteer');
         const filename = segments[segments.length - 1];
         if (
             !(await window.fileExists(`data/${filename}`)) &&
-            anchor.href.startsWith('http://www.corteidh.or.cr/docs/casos/articulos/seriec_') &&
+            (
+              anchor.href.startsWith('http://www.corteidh.or.cr/docs/casos/articulos/seriec_') ||
+              anchor.href.startsWith('http://www.corteidh.or.cr/docs/opiniones/seriea_') ||
+              anchor.href.startsWith('https://www.corteidh.or.cr/docs/opiniones/seriea_')
+            ) &&
             anchor.href.endsWith('_esp.pdf')
             ) {
           anchor.setAttribute("download", filename);
@@ -43,4 +47,10 @@ const puppeteer = require('puppeteer');
     });
     throw e;
   }
-})();
+};
+(async () => {
+  await Promise.all([
+    runForURL('https://www.corteidh.or.cr/casos_sentencias.cfm'),
+    runForURL('https://www.corteidh.or.cr/opiniones_consultivas.cfm'),
+  ]);
+})()
