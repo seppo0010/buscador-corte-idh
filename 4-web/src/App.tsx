@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Caso from './Caso'
 import Highlighter from './Highlighter'
 import './App.css';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import LinearProgress from '@mui/material/LinearProgress';
 
 // eslint-disable-next-line import/no-webpack-loader-syntax
 const Worker = require('workerize-loader!./search.worker')
@@ -53,36 +61,38 @@ function App() {
   }, [searchCriteria, workerInstance])
 
   return (
-    <div className="App">
+    <React.Fragment><CssBaseline /><Container maxWidth="sm"><Box>
       <header>
-        Bienvenido al Buscador no oficial de Jurisprudencia de la Corte
-        Interamericana de Derechos Humanos.
-        {!ready && `Cargando... ${progress !== null ? Math.round(progress * 100) + '%' : ''}`}
+        <p>
+          Bienvenido al Buscador no oficial de Jurisprudencia de la Corte
+          Interamericana de Derechos Humanos.
+        </p>
+        {!ready && <>
+          Cargando... {progress}
+          <LinearProgress variant={'determinate'} value={100 * (progress || 0)} />
+        </>}
         {ready && <label>
-          <span>Buscar</span>
-          <input autoFocus={true} type="text" placeholder={"bulacio"} value={searchCriteria} ref={searchInputRef} onChange={(event) => {
+          <TextField autoFocus={true} type="search" label="Buscar" placeholder={"bulacio"} value={searchCriteria} ref={searchInputRef} onChange={(event) => {
             const value = event.target.value
             setSearchCriteria(value)
-          }} />
-          <button onClick={() => {
-            setSearchCriteria('')
-            searchInputRef.current?.focus()
-          }} aria-label="Clear" id="clear" className={searchCriteria === '' ? 'hidden' : ''}></button>
+          }} fullWidth />
         </label>}
       </header>
       <div>
         {didSearch && searchResults.length > 0 && <>
-          <ul>
+          <List>
             {searchResults.map(({ caso, data, filename, excerpt }) => (
-              <li key={filename}>
-                <p><strong><a href={'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')} target="_blank" rel="noreferrer">{caso}</a></strong></p>
-                <Highlighter text={data} criteria={searchCriteria} length={200} />
-               </li>
+              <ListItem key={filename}>
+                <ListItemText>
+                  <p><strong><a href={'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')} target="_blank" rel="noreferrer">{caso}</a></strong></p>
+                  <p><Highlighter text={data} criteria={searchCriteria} length={200} /></p>
+                </ListItemText>
+               </ListItem>
             ))}
-          </ul>
+          </List>
         </>}
       </div>
-    </div>
+    </Box></Container></React.Fragment>
   );
 }
 
