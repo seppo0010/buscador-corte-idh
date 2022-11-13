@@ -15,14 +15,14 @@ const runForURL = async (url) => {
       downloadPath: dataDir,
     });
 
-    await page.exposeFunction('fileExists', f => fs.existsSync(f));
+    await page.exposeFunction('fileExists', f => fs.existsSync(`${dataDir}/${f}`));
     const resultsSelector = '.search-result a'
     const links = (await page.evaluate(resultsSelector => {
       return [...document.querySelectorAll(resultsSelector)].map(async (anchor) => {
         const segments = anchor.href.split('/');
         const filename = segments[segments.length - 1];
         if (
-            !(await window.fileExists(`${dataDir}/${filename}`)) &&
+            !(await window.fileExists(filename)) &&
             (
               anchor.href.startsWith('http://www.corteidh.or.cr/docs/casos/articulos/seriec_') ||
               anchor.href.startsWith('http://www.corteidh.or.cr/docs/opiniones/seriea_') ||
