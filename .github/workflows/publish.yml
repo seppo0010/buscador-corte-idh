@@ -27,3 +27,4 @@ jobs:
         run: ./run.sh
         env:
           DATA_DIR: /home/pptruser/data
+          HOME: /home/pptruser
