@@ -1,3 +1,4 @@
+import fetchProgress from 'fetch-progress'
 import MiniSearch from 'minisearch'
 
 let index: MiniSearch
@@ -17,9 +18,23 @@ const doSearch = () => {
 }
 
 export async function init () {
+  let contentLength = -1;
+  // for some reason, mf react server does not return content-length on static GET
+  fetch(`${process.env.PUBLIC_URL}/data.json`, { method: 'HEAD' })
+    .then((res) => contentLength = parseInt(res.headers.get('content-length') || '-1', 10))
   fetch(`${process.env.PUBLIC_URL}/data.json`)
+    .then(fetchProgress({
+      onProgress({ transferred } ) {
+        if (contentLength !== -1) {
+          global.self.postMessage(['setProgress', transferred / contentLength])
+        }
+      },
+      onError(err) {
+        // TODO: something
+      },
+    }))
     .then((res) => res.text())
-    // minisearch configuration must match datamaker's
+    // minisearch configuration must match 3-index's
     .then((data) => {
       index = MiniSearch.loadJSON(data, {
         idField: 'caso',

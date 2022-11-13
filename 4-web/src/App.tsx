@@ -13,6 +13,7 @@ function App() {
   const [searchCriteria, setSearchCriteria] = useState('')
   const [didSearch, setDidSearch] = useState(false)
   const [ready, setReady] = useState(false)
+  const [progress, setProgress] = useState<null | number>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -29,6 +30,7 @@ function App() {
       case 'setSearchResults': setSearchResults(params); break
       case 'setDidSearch': setDidSearch(params); break
       case 'setReady': setReady(params); break
+      case 'setProgress': setProgress(params); break
       default: console.error('unexpected message type: ' + t); break
     }
   }
@@ -55,7 +57,7 @@ function App() {
       <header>
         Bienvenido al Buscador no oficial de Jurisprudencia de la Corte
         Interamericana de Derechos Humanos.
-        {!ready && 'Cargando...'}
+        {!ready && `Cargando... ${progress !== null ? Math.round(progress * 100) + '%' : ''}`}
         {ready && <label>
           <span>Buscar</span>
           <input autoFocus={true} type="text" placeholder={"bulacio"} value={searchCriteria} ref={searchInputRef} onChange={(event) => {
