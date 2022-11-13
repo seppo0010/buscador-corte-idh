@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/buscador-corte-idh/static/css/main.a34b9d66.css",
-    "main.js": "/buscador-corte-idh/static/js/main.adedaf68.js",
-    "worker.js": "/buscador-corte-idh/9a1913bb94db970b8ef7.worker.js",
+    "main.js": "/buscador-corte-idh/static/js/main.81dd8787.js",
+    "worker.js": "/buscador-corte-idh/bf62da64fc158fa76579.worker.js",
     "static/media/cadh.txt": "/buscador-corte-idh/static/media/cadh.4745d0c557adfbe2ebdb.txt",
     "index.html": "/buscador-corte-idh/index.html",
     "main.a34b9d66.css.map": "/buscador-corte-idh/static/css/main.a34b9d66.css.map",
-    "main.adedaf68.js.map": "/buscador-corte-idh/static/js/main.adedaf68.js.map"
+    "main.81dd8787.js.map": "/buscador-corte-idh/static/js/main.81dd8787.js.map"
   },
   "entrypoints": [
     "static/css/main.a34b9d66.css",
-    "static/js/main.adedaf68.js"
+    "static/js/main.81dd8787.js"
   ]
 }
