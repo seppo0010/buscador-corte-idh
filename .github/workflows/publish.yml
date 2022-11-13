@@ -13,4 +13,4 @@ jobs:
           path: /data
           key: data
       - name: Run
-        runs: ./run.sh
+        run: ./run.sh
