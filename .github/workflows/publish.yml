@@ -23,6 +23,7 @@ jobs:
           path: /home/pptruser/data
           key: data
       - name: Run
+        working-directory: /home/pptruser
         run: ./run.sh
         env:
           DATA_DIR: /home/pptruser/data
