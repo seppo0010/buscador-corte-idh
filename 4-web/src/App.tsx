@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Caso from './Caso'
+import Highlighter from './Highlighter'
 import './App.css';
 
 // eslint-disable-next-line import/no-webpack-loader-syntax
@@ -70,8 +71,11 @@ function App() {
       <div>
         {didSearch && searchResults.length > 0 && <>
           <ul>
-            {searchResults.map(({ caso, filename }) => (
-              <li key={filename}>{caso} </li>
+            {searchResults.map(({ caso, data, filename, excerpt }) => (
+              <li key={filename}>
+                <p><strong>{caso}</strong></p>
+                <Highlighter text={data} criteria={searchCriteria} length={200} />
+               </li>
             ))}
           </ul>
         </>}
