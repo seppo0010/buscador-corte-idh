@@ -1,0 +1,16 @@
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/seppo0010/buscador-corte-idh:latest
+    steps:
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: /data
+          key: data
+      - name: Run
+        runs: ./run.sh
