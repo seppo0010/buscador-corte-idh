@@ -2,18 +2,26 @@ on:
   workflow_call:
 
 jobs:
+  configure:
+    runs-on: ubuntu-latest
+    outputs:
+      uid_gid: ${{ steps.get-user.outputs.uid_gid }}
+    steps:
+      - id: get-user
+        run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
+
   publish:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/seppo0010/buscador-corte-idh:latest
-      options: "--cap-add=SYS_ADMIN"
+      options: --user ${{ needs.configure.outputs.uid_gid }} --cap-add=SYS_ADMIN
     steps:
       - name: Cache
         uses: actions/cache@v3
         with:
-          path: /tmp/data
+          path: /home/pptruser/data
           key: data
       - name: Run
         run: ./run.sh
         env:
-          DATA_DIR: /tmp/data
+          DATA_DIR: /home/pptruser/data
