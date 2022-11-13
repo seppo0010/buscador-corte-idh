@@ -115,8 +115,9 @@ function App() {
         }
       </header>
       <div>
-        {didSearch && searchResults.length > 0 && <>
-          <List>
+        {didSearch && <>
+          {searchResults.length === 0 && 'No hay resultados'}
+          {searchResults.length > 0 && <List>
             {searchResults.map(({ caso, data, filename, excerpt, fecha }) => (
               <ListItem key={filename}>
                 <ListItemText>
@@ -125,7 +126,7 @@ function App() {
                 </ListItemText>
                </ListItem>
             ))}
-          </List>
+          </List>}
         </>}
       </div>
     </Box></Container></React.Fragment>
