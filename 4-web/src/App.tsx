@@ -81,10 +81,10 @@ function App() {
       <div>
         {didSearch && searchResults.length > 0 && <>
           <List>
-            {searchResults.map(({ caso, data, filename, excerpt }) => (
+            {searchResults.map(({ caso, data, filename, excerpt, fecha }) => (
               <ListItem key={filename}>
                 <ListItemText>
-                  <p><strong><a href={'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')} target="_blank" rel="noreferrer">{caso}</a></strong></p>
+                  <p><strong><a href={'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')} target="_blank" rel="noreferrer">{caso} {fecha ? `(${fecha})` : ''}</a></strong></p>
                   <p><Highlighter text={data} criteria={searchCriteria} length={200} /></p>
                 </ListItemText>
                </ListItem>
