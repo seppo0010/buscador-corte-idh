@@ -75,7 +75,7 @@ function App() {
           <ul>
             {searchResults.map(({ caso, data, filename, excerpt }) => (
               <li key={filename}>
-                <p><strong>{caso}</strong></p>
+                <p><strong><a href={'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')} target="_blank" rel="noreferrer">{caso}</a></strong></p>
                 <Highlighter text={data} criteria={searchCriteria} length={200} />
                </li>
             ))}
