@@ -14,10 +14,16 @@ const doSearch = () => {
     global.self.postMessage(['setSearchResults', []])
     return
   }
-  let results = index.search(criteria)
-  if (articuloFilter !== null) {
-    results = results.filter(({ articulos }) => articulos.includes(articuloFilter));
+  let searchCriteria = criteria
+  if (criteria[0] === '"' && criteria[criteria.length - 1] === '"') {
+    searchCriteria = criteria.substr(1, criteria.length - 2);
   }
+  let results = index.search(searchCriteria, {
+    filter: ({ articulos, data }) => (
+      (articuloFilter === null || articulos.includes(articuloFilter)) &&
+      (criteria[0] !== '"' || criteria[criteria.length - 1] !== '"' || data.includes(searchCriteria))
+    ),
+  })
   global.self.postMessage(['setDidSearch', true])
   global.self.postMessage(['setSearchResults', results.slice(0, 40)])
 }
