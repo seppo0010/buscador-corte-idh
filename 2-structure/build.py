@@ -3,11 +3,12 @@ from glob import glob
 import re
 import os.path
 
+data_dir = os.environ.get('DATA_DIR', 'data')
 def run():
     'Creates structured files from text files'
     file_path = os.path.abspath(os.path.dirname(__file__))
-    os.makedirs(os.path.join(file_path, 'data'), exist_ok=True)
-    for filename in glob(os.path.join(file_path, '../1-extract/data/*')):
+    os.makedirs(os.path.join(file_path, data_dir), exist_ok=True)
+    for filename in glob(os.path.join(file_path, data_dir + '/*.txt')):
         with open(filename, 'r', encoding='utf-8') as filepointer:
             data = filepointer.read()
         lines = [line.strip() for line in data.split('\n') if line not in ('', '1', '*')]
@@ -33,6 +34,7 @@ def run():
                 ):
             caso = f'CASO {caso}'
 
+        curr = None
         if caso.startswith('CASO'):
             line += 1
 
@@ -74,7 +76,7 @@ def run():
             for art in re.findall(r'([0-9]+(?:\.[0-9]+)?)', arts):
                 articulos.add(int(art.split('.')[0]))
 
-        target = os.path.join(file_path, 'data', os.path.basename(filename)[:-4] + '.json')
+        target = os.path.join(data_dir, os.path.basename(filename)[:-4] + '.json')
         with open(target, 'w', encoding='utf-8') as filepointer:
             filepointer.write(json.dumps({
                 'caso': caso,

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 
+const dataDir = process.env.DATA_DIR || './data'
 const runForURL = async (url) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -11,7 +12,7 @@ const runForURL = async (url) => {
 
     await page._client().send("Page.setDownloadBehavior", {
       behavior: "allow",
-      downloadPath: './data',
+      downloadPath: dataDir,
     });
 
     await page.exposeFunction('fileExists', f => fs.existsSync(f));
@@ -21,7 +22,7 @@ const runForURL = async (url) => {
         const segments = anchor.href.split('/');
         const filename = segments[segments.length - 1];
         if (
-            !(await window.fileExists(`data/${filename}`)) &&
+            !(await window.fileExists(`${dataDir}/${filename}`)) &&
             (
               anchor.href.startsWith('http://www.corteidh.or.cr/docs/casos/articulos/seriec_') ||
               anchor.href.startsWith('http://www.corteidh.or.cr/docs/opiniones/seriea_') ||

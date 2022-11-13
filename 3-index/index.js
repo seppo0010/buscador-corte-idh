@@ -10,10 +10,10 @@ const miniSearch = new MiniSearch({
   storeFields: ['caso', 'data', 'fecha', 'filename', 'articulos'],
 })
 
-const base = path.join(__dirname, '../2-structure/data')
-for (const file of tqdm(fs.readdirSync(base))) {
-  const raw = JSON.parse(fs.readFileSync(path.join(base, file), 'utf-8'));
+const dataDir = process.env.DATA_DIR || 'data'
+for (const file of tqdm(fs.readdirSync(dataDir).filter((x) => x.endsWith('.json')))) {
+  const raw = JSON.parse(fs.readFileSync(path.join(dataDir, file), 'utf-8'));
   raw.filename = file;
   miniSearch.add(raw);
 }
-fs.writeFileSync('data.json', JSON.stringify(miniSearch));
+fs.writeFileSync(path.join(dataDir, 'data.json'), JSON.stringify(miniSearch));
