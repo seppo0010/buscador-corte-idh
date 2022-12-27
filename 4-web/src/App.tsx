@@ -12,6 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent }  from '@mui/material/Select';
+import Typography from '@mui/material/Typography';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import cadh from './cadh.txt';
 
@@ -27,6 +28,7 @@ function App() {
   const [didSearch, setDidSearch] = useState(false)
   const [ready, setReady] = useState(false)
   const [progress, setProgress] = useState<null | number>(null);
+  const [latest, setLatest] = useState<null | Caso[]>(null);
   const [articulos, setArticulos] = useState<null | Map<number, string>>(null);
   const [loadingArticulos, setLoadingArticulos] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null)
@@ -46,6 +48,7 @@ function App() {
       case 'setDidSearch': setDidSearch(params); break
       case 'setReady': setReady(params); break
       case 'setProgress': setProgress(params); break
+      case 'setLatest': setLatest(params); break
       default: console.error('unexpected message type: ' + t); break
     }
   }
@@ -83,7 +86,7 @@ function App() {
 
   return (
     <React.Fragment><CssBaseline /><Container maxWidth="sm"><Box>
-      <header>
+      <header style={{marginBottom: 40}}>
         <p>
           Buscador no oficial de Jurisprudencia de la Corte
           Interamericana de Derechos Humanos.
@@ -115,8 +118,25 @@ function App() {
         }
       </header>
       <div>
+        {!didSearch && latest !== null && latest.length > 0 && <>
+          <Typography variant="subtitle2" style={{marginLeft: 16}}>Casos más recientes</Typography>
+          <List>
+            {latest.map(({ caso, data, filename, excerpt, fecha }) => (
+              <ListItem key={filename}>
+                <ListItemText>
+                  <p><strong><a href={
+                    filename.startsWith('seriea_') ?
+                    'http://www.corteidh.or.cr/docs/opiniones/' + filename.replace(/json$/, 'pdf') :
+                    'https://www.corteidh.or.cr/docs/casos/articulos/' + filename.replace(/json$/, 'pdf')
+                  } target="_blank" rel="noreferrer">{caso} {fecha ? `(${fecha})` : ''}</a></strong></p>
+                  <p>{data.substr(data.indexOf('\n\n'), 200)}</p>
+                </ListItemText>
+               </ListItem>
+            ))}
+          </List>
+        </>}
         {didSearch && <>
-          {searchResults.length === 0 && 'No hay resultados'}
+          {searchResults.length === 0 && <p style={{marginLeft: 16}}>No hay resultados</p>}
           {searchResults.length > 0 && <List>
             {searchResults.map(({ caso, data, filename, excerpt, fecha }) => (
               <ListItem key={filename}>

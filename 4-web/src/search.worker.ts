@@ -1,6 +1,7 @@
 import fetchProgress from 'fetch-progress'
 import MiniSearch from 'minisearch'
 import pako from 'pako'
+import Caso from './Caso'
 
 let index: MiniSearch
 let criteria = ''
@@ -45,7 +46,8 @@ export async function init () {
     .then((res) => res.arrayBuffer())
     // minisearch configuration must match 3-index's
     .then((data) => {
-      index = MiniSearch.loadJSON(new TextDecoder().decode(pako.inflate(data)), {
+      const textData = new TextDecoder().decode(pako.inflate(data));
+      index = MiniSearch.loadJSON(textData, {
         idField: 'caso',
         fields: ['caso', 'data'],
         storeFields: ['caso', 'data', 'fecha', 'filename', 'articulos'],
@@ -55,8 +57,10 @@ export async function init () {
           prefix: true
         }
       })
+      const storedFields: Caso[] = Object.values(JSON.parse(textData).storedFields);
+      storedFields.sort((a: Caso, b: Caso) => (a.fecha || '').localeCompare(b.fecha || ''))
+      global.self.postMessage(['setLatest', storedFields.slice(-10).reverse()]);
       global.self.postMessage(['setReady', true])
-
       doSearch()
     })
     // TODO: handle error
