@@ -89,7 +89,8 @@ function App() {
       <header style={{marginBottom: 40}}>
         <p>
           Buscador no oficial de Jurisprudencia de la Corte
-          Interamericana de Derechos Humanos.
+          Interamericana de Derechos Humanos.<br />
+          {process.env.REACT_APP_DATE !== "" ? <span>(&Uacute;ltima actualizaci&oacute;n: {process.env.REACT_APP_DATE})</span> : ''}
         </p>
         {!ready && <>
           Cargando...
