@@ -9,6 +9,7 @@
   "author": "",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "puppeteer": "^19.2.2"
+    "puppeteer": "^19.11.1",
+    "puppeteer-real-browser": "^1.4.4"
   }
 }
