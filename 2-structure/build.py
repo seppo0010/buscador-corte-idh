@@ -51,8 +51,8 @@ def run():
                     raise ValueError(f'Failed to parse {filename}')
 
         if curr is not None:
-            fecha = [el for el in curr.split(' ') if el != 'DE']
-            year = int(fecha[-1].strip('*'))
+            fecha_parts = [el for el in curr.split(' ') if el != 'DE']
+            year = int(fecha_parts[-1].strip('*'))
             assert year > 1900
             month = {
                 'ENERO': 1,
@@ -64,17 +64,37 @@ def run():
                 'JULIO': 7,
                 'AGOSTO': 8,
                 'SEPTIEMBRE': 9,
+                'SETIEMBRE': 9,
+                'SEPTIEMPRE': 9,
                 'OCTUBRE': 10,
                 'NOVIEMBRE': 11,
                 'DICIEMBRE': 12,
-            }[fecha[-2]]
-            day = int(fecha[-3])
+            }[fecha_parts[-2]]
+            day = int(fecha_parts[-3])
             fecha = f'{year}-{month:02}-{day:02}'
 
         articulos = set()
-        for arts in re.findall(r'artículos? ([0-9\. y,]*?) de la Convención Americana', ' '.join(lines)):
-            for art in re.findall(r'([0-9]+(?:\.[0-9]+)?)', arts):
-                articulos.add(int(art.split('.')[0]))
+        text_content = ' '.join(lines)
+        # Robust pattern for detecting references to CADH articles
+        # Matches article numbers followed by common names of the American Convention
+        segment_pattern = r'(?i)art(?:ículos?|\.)\s+(.+?)\s+(?:de\s+la|de\s+esta|de\s+esa|del|en\s+la)\s+(?:Convención Americana|Convención|CADH|Pacto de San José)'
+        for match in re.finditer(segment_pattern, text_content):
+            arts_str = match.group(1)
+            if len(arts_str) > 300: # Safety to avoid over-matching across blocks
+                continue
+            
+            # 1. Handle ranges like "48 a 50" -> 48, 49, 50
+            for start, end in re.findall(r'(\d+)\s+a\s+(\d+)', arts_str):
+                for i in range(int(start), int(end) + 1):
+                    articulos.add(i)
+            
+            # 2. Clean common noise like "(Derecho a la Vida)" and labels like "numeral 1"
+            clean_arts = re.sub(r'\(.*?\)', '', arts_str)
+            clean_arts = re.sub(r'(?i)(?:numeral|inciso|párrafo|página|p\.|pág\.)\s+\d+', '', clean_arts)
+            
+            # 3. Extract the article numbers (integer part only, for filtering)
+            for art in re.findall(r'\b(\d+)(?:\.\d+)?\b', clean_arts):
+                articulos.add(int(art))
 
         target = os.path.join(data_dir, os.path.basename(filename)[:-4] + '.json')
         with open(target, 'w', encoding='utf-8') as filepointer:
