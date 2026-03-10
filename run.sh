@@ -9,3 +9,4 @@ node 3-index/index.js
 gzip -n $DATA_DIR/data.json --stdout > 4-web/public/data.json.gz
 pushd 4-web
 npm run deploy
+popd

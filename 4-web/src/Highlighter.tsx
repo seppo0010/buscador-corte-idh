@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import './Highlighter.css'
 
 interface HighlighterProps {
@@ -7,40 +7,56 @@ interface HighlighterProps {
   length?: number
 }
 
-function Highlighter({ text, criteria, length }: React.PropsWithChildren<HighlighterProps>) {
-  const [highlightedText, setHighlightedText] = useState(<React.Fragment></React.Fragment>)
-  useEffect(() => {
-    const updateFragment = () => {
-      setHighlightedText(<React.Fragment>
-        <span className="no-hl">{length ? text.slice(0, length) : text}</span>
-      </React.Fragment>)
+function Highlighter({ text, criteria, length = 200 }: React.PropsWithChildren<HighlighterProps>) {
+  if (!text) return <span />
+
+  // Parse all search terms (handles quoted phrases and individual words)
+  const terms = Array.from((criteria || '').matchAll(/"([^"]+)"|([\w\u00C0-\u024F]+)/g))
+    .map(m => (m[1] || m[2]).toLowerCase())
+    .filter(t => t.length >= 2)
+
+  if (!terms.length) {
+    return <span className="no-hl">{text.slice(0, length)}</span>
+  }
+
+  const textLower = text.toLowerCase()
+
+  // Find the best excerpt window: slide over text to find where most terms cluster
+  const step = 20
+  let bestScore = -1
+  let bestPos = 0
+  for (let i = 0; i < Math.max(1, text.length - length); i += step) {
+    const window = textLower.slice(i, i + length)
+    const score = terms.filter(t => window.includes(t)).length
+    if (score > bestScore) {
+      bestScore = score
+      bestPos = i
     }
+  }
 
-    if (!criteria) {
-      updateFragment();
-      return;
-    };
+  const excerpt = text.slice(bestPos, bestPos + length)
 
-    const term = criteria.split(' ')[0];
-    const index = text.search(new RegExp(term, 'i'))
+  // Build a single regex alternation for all terms (escaped)
+  const escaped = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const pattern = new RegExp(escaped.join('|'), 'gi')
 
-    if (index === -1) {
-      updateFragment();
-      return;
-    };
+  // Split excerpt into highlighted and plain parts
+  const parts: React.ReactNode[] = []
+  let last = 0
+  let match: RegExpExecArray | null
+  let key = 0
+  while ((match = pattern.exec(excerpt)) !== null) {
+    if (match.index > last) {
+      parts.push(<span key={key++} className="no-hl">{excerpt.slice(last, match.index)}</span>)
+    }
+    parts.push(<span key={key++} className="hl">{match[0]}</span>)
+    last = match.index + match[0].length
+  }
+  if (last < excerpt.length) {
+    parts.push(<span key={key++} className="no-hl">{excerpt.slice(last)}</span>)
+  }
 
-    setHighlightedText(<React.Fragment>
-      <span className="no-hl">{text.slice(length ? Math.max(0, index - (length / 2)) : 0, index)}</span>
-      <span className="hl">{text.slice(index, index + term.length)}</span>
-      <span className="no-hl">{length ? text.slice(index + term.length, index + term.length + (length / 2)) : text.slice(index + term.length)}</span>
-    </React.Fragment>)
-  }, [text, criteria, length])
-
-  return (
-    <span>
-      {highlightedText}
-    </span>
-  )
+  return <span>{parts}</span>
 }
 
 export default Highlighter
