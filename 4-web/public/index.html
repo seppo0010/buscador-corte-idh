@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // GitHub Pages SPA redirect: decode path from query param
+      (function() {
+        var p = window.location.search.slice(1).split('&').reduce(function(q, s) {
+          s = s.split('='); q[s[0]] = s.slice(1).join('='); return q;
+        }, {});
+        if (p.p !== undefined) {
+          window.history.replaceState(
+            null, null,
+            window.location.pathname.split('/').slice(0, -1).join('/') + '/' +
+            decodeURIComponent(p.p) + (p.hash ? '#' + p.hash : '')
+          );
+        }
+      }());
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />

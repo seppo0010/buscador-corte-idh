@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Caso from './Caso'
 import Highlighter from './Highlighter'
+import PaisPage from './PaisPage'
+import ArticuloPage from './ArticuloPage'
 import './App.css';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -11,9 +14,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent }  from '@mui/material/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import cadh from './cadh.txt';
 
@@ -39,7 +43,46 @@ function readUrlParams() {
   }
 }
 
-function App() {
+function exportCsv(results: Caso[]) {
+  const header = 'caso,fecha,pais,tipo_sentencia,articulos,url'
+  const rows = results.map(c => [
+    `"${(c.caso || '').replace(/"/g, '""')}"`,
+    c.fecha || '',
+    c.pais || '',
+    `"${(c.tipo_sentencia || []).join('; ')}"`,
+    `"${(c.articulos || []).join('; ')}"`,
+    caseUrl(c.filename),
+  ].join(','))
+  const csv = [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'resultados-corte-idh.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function parseArticuloTexts(cadhText: string): Map<number, string> {
+  const map = new Map<number, string>()
+  const matches = Array.from(cadhText.matchAll(/^(Artículo \d+[^\n]*)\n([\s\S]*?)(?=^Artículo \d+|$)/gm))
+  for (const m of matches) {
+    const numMatch = m[1].match(/Artículo (\d+)/)
+    if (numMatch) {
+      map.set(parseInt(numMatch[1], 10), (m[1] + '\n' + m[2]).trim())
+    }
+  }
+  return map
+}
+
+interface SearchPageProps {
+  allDocs: Caso[]
+  articulos: Map<number, string> | null
+  articuloTexts: Map<number, string>
+  onAllDocs: (docs: Caso[]) => void
+}
+
+function SearchPage({ allDocs, articulos, articuloTexts, onAllDocs }: SearchPageProps) {
   const initial = readUrlParams()
   const [loading, setLoading] = useState(false)
   const [workerInstance, setWorkerInstance] = useState<any | null>(null)
@@ -53,11 +96,9 @@ function App() {
   const [sortOrder, setSortOrder] = useState<'relevancia' | 'fecha'>(initial.orden)
   const [didSearch, setDidSearch] = useState(false)
   const [ready, setReady] = useState(false)
-  const [progress, setProgress] = useState<null | number>(null);
-  const [latest, setLatest] = useState<null | Caso[]>(null);
-  const [articulos, setArticulos] = useState<null | Map<number, string>>(null);
-  const [loadingArticulos, setLoadingArticulos] = useState(false);
-  const [countries, setCountries] = useState<string[]>([]);
+  const [progress, setProgress] = useState<null | number>(null)
+  const [latest, setLatest] = useState<null | Caso[]>(null)
+  const [countries, setCountries] = useState<string[]>([])
   const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   // Sync URL when filters change
@@ -90,6 +131,7 @@ function App() {
       case 'setProgress': setProgress(params); break
       case 'setLatest': setLatest(params); break
       case 'setCountries': setCountries(params); break
+      case 'setAllDocs': onAllDocs(params); break
       default: console.error('unexpected message type: ' + t); break
     }
   }
@@ -110,20 +152,6 @@ function App() {
     workerInstance?.search(searchCriteria, articuloFilter, paisFilter, desdeFilter, hastaFilter, tipoFilter, sortOrder)
   }, [searchCriteria, articuloFilter, paisFilter, desdeFilter, hastaFilter, tipoFilter, sortOrder, workerInstance])
 
-  useEffect(() => {
-    if (loadingArticulos) return;
-    setLoadingArticulos(true);
-    (async () => {
-      const req = await fetch(cadh)
-      const res = await req.text();
-      const map = new Map();
-      for (const [name, id] of Array.from(res.matchAll(/^Artículo ([0-9]+).*/gmd))) {
-        map.set(parseInt(id, 10), name);
-      }
-      setArticulos(map);
-    })();
-  }, [articulos, loadingArticulos]);
-
   const renderCasoItem = (c: Caso, showHighlight: boolean) => (
     <ListItem key={c.filename}>
       <ListItemText>
@@ -133,9 +161,23 @@ function App() {
               {c.caso} {c.fecha ? `(${c.fecha})` : ''}
             </a>
           </strong>
-          {c.pais && <span style={{marginLeft: 8, color: '#666', fontSize: '0.85em'}}>{c.pais}</span>}
+          {c.pais && (
+            <Link to={`/pais/${encodeURIComponent(c.pais)}`} style={{ marginLeft: 8, color: '#666', fontSize: '0.85em', textDecoration: 'none' }}>
+              {c.pais}
+            </Link>
+          )}
           {c.tipo_sentencia && c.tipo_sentencia.length > 0 &&
-            <span style={{marginLeft: 8, color: '#888', fontSize: '0.8em'}}>{c.tipo_sentencia.join(', ')}</span>}
+            <span style={{ marginLeft: 8, color: '#888', fontSize: '0.8em' }}>{c.tipo_sentencia.join(', ')}</span>}
+          {c.articulos && c.articulos.length > 0 && (
+            <span style={{ marginLeft: 8, fontSize: '0.8em' }}>
+              {c.articulos.map((art, i) => (
+                <React.Fragment key={art}>
+                  {i > 0 && ', '}
+                  <Link to={`/articulo/${art}`} style={{ color: '#1976d2', textDecoration: 'none' }}>Art. {art}</Link>
+                </React.Fragment>
+              ))}
+            </span>
+          )}
         </p>
         <p>
           {showHighlight
@@ -148,7 +190,7 @@ function App() {
 
   return (
     <React.Fragment><CssBaseline /><Container maxWidth="sm"><Box>
-      <header style={{marginBottom: 40}}>
+      <header style={{ marginBottom: 40 }}>
         <p>
           Buscador no oficial de Jurisprudencia de la Corte
           Interamericana de Derechos Humanos.<br />
@@ -161,9 +203,9 @@ function App() {
         {ready && <>
           <TextField autoFocus={true} type="search" label="Buscar" placeholder={"bulacio"} value={searchCriteria} ref={searchInputRef} onChange={(event) => {
             setSearchCriteria(event.target.value)
-          }} fullWidth style={{marginBottom: 8}} />
+          }} fullWidth style={{ marginBottom: 8 }} />
 
-          <Grid container spacing={1} style={{marginBottom: 8}}>
+          <Grid container spacing={1} style={{ marginBottom: 8 }}>
             {articulos && (
               <Grid item xs={12} sm={6}>
                 <Select
@@ -256,20 +298,67 @@ function App() {
       </header>
       <div>
         {!didSearch && latest !== null && latest.length > 0 && <>
-          <Typography variant="subtitle2" style={{marginLeft: 16}}>Casos más recientes</Typography>
+          <Typography variant="subtitle2" style={{ marginLeft: 16 }}>Casos más recientes</Typography>
           <List>
             {latest.map((c) => renderCasoItem(c, false))}
           </List>
         </>}
         {didSearch && <>
-          {searchResults.length === 0 && <p style={{marginLeft: 16}}>No hay resultados</p>}
-          {searchResults.length > 0 && <List>
-            {searchResults.map((c) => renderCasoItem(c, true))}
-          </List>}
+          {searchResults.length === 0 && <p style={{ marginLeft: 16 }}>No hay resultados</p>}
+          {searchResults.length > 0 && <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <Button size="small" onClick={() => exportCsv(searchResults)}>
+                Exportar CSV
+              </Button>
+            </Box>
+            <List>
+              {searchResults.map((c) => renderCasoItem(c, true))}
+            </List>
+          </>}
         </>}
       </div>
     </Box></Container></React.Fragment>
-  );
+  )
+}
+
+function App() {
+  const [allDocs, setAllDocs] = useState<Caso[]>([])
+  const [articulos, setArticulos] = useState<Map<number, string> | null>(null)
+  const [articuloTexts, setArticuloTexts] = useState<Map<number, string>>(new Map())
+
+  useEffect(() => {
+    (async () => {
+      const req = await fetch(cadh)
+      const text = await req.text()
+      const map = new Map<number, string>()
+      for (const [name, id] of Array.from(text.matchAll(/^Artículo ([0-9]+).*/gmd))) {
+        map.set(parseInt(id, 10), name)
+      }
+      setArticulos(map)
+      setArticuloTexts(parseArticuloTexts(text))
+    })()
+  }, [])
+
+  return (
+    <BrowserRouter basename={process.env.PUBLIC_URL || '/'}>
+      <Routes>
+        <Route path="/" element={
+          <SearchPage
+            allDocs={allDocs}
+            articulos={articulos}
+            articuloTexts={articuloTexts}
+            onAllDocs={setAllDocs}
+          />
+        } />
+        <Route path="/pais/:pais" element={
+          <PaisPage allDocs={allDocs} articulos={articulos || new Map()} />
+        } />
+        <Route path="/articulo/:id" element={
+          <ArticuloPage allDocs={allDocs} articulos={articulos || new Map()} articuloTexts={articuloTexts} />
+        } />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;

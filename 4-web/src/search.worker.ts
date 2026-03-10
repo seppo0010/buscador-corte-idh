@@ -90,6 +90,7 @@ export async function init () {
       const storedFields: Caso[] = Object.values(JSON.parse(textData).storedFields);
       storedFields.sort((a: Caso, b: Caso) => (a.fecha || '').localeCompare(b.fecha || ''))
       allDocs = storedFields
+      global.self.postMessage(['setAllDocs', storedFields]);
       global.self.postMessage(['setLatest', storedFields.slice(-10).reverse()]);
 
       const countries = Array.from(new Set(
