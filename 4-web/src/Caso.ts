@@ -8,5 +8,6 @@ export default interface Caso {
   numero_serie: number | null;
   tipo_documento: string;
   tipo_sentencia: string[];
+  casos_relacionados?: string[];
   excerpt?: string;
 }

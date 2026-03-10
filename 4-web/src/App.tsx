@@ -152,6 +152,12 @@ function SearchPage({ allDocs, articulos, articuloTexts, onAllDocs }: SearchPage
     workerInstance?.search(searchCriteria, articuloFilter, paisFilter, desdeFilter, hastaFilter, tipoFilter, sortOrder)
   }, [searchCriteria, articuloFilter, paisFilter, desdeFilter, hastaFilter, tipoFilter, sortOrder, workerInstance])
 
+  const docMap = React.useMemo(() => {
+    const m = new Map<string, Caso>()
+    for (const doc of allDocs) m.set(doc.filename, doc)
+    return m
+  }, [allDocs])
+
   const renderCasoItem = (c: Caso, showHighlight: boolean) => (
     <ListItem key={c.filename}>
       <ListItemText>
@@ -184,6 +190,23 @@ function SearchPage({ allDocs, articulos, articuloTexts, onAllDocs }: SearchPage
             ? <Highlighter text={c.resumen || ''} criteria={searchCriteria} length={300} />
             : <span>{c.resumen ? c.resumen.slice(0, 300) : ''}</span>}
         </p>
+        {c.casos_relacionados && c.casos_relacionados.length > 0 && (
+          <p style={{ fontSize: '0.8em', color: '#666', margin: '4px 0 0' }}>
+            <strong>Relacionados:</strong>{' '}
+            {c.casos_relacionados.map((fn, i) => {
+              const rel = docMap.get(fn)
+              if (!rel) return null
+              return (
+                <React.Fragment key={fn}>
+                  {i > 0 && ' · '}
+                  <a href={caseUrl(fn)} target="_blank" rel="noreferrer" style={{ color: '#666' }}>
+                    {rel.caso}
+                  </a>
+                </React.Fragment>
+              )
+            })}
+          </p>
+        )}
       </ListItemText>
     </ListItem>
   )

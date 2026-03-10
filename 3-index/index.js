@@ -8,7 +8,7 @@ const MiniSearch = require('minisearch')
 const miniSearch = new MiniSearch({
   idField: 'filename',
   fields: ['caso', 'data'],
-  storeFields: ['caso', 'resumen', 'fecha', 'filename', 'articulos', 'pais', 'numero_serie', 'tipo_documento', 'tipo_sentencia'],
+  storeFields: ['caso', 'resumen', 'fecha', 'filename', 'articulos', 'pais', 'numero_serie', 'tipo_documento', 'tipo_sentencia', 'casos_relacionados'],
 })
 
 const dataDir = process.env.DATA_DIR || 'data'

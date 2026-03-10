@@ -80,7 +80,7 @@ export async function init () {
       index = MiniSearch.loadJSON(textData, {
         idField: 'filename',
         fields: ['caso', 'data'],
-        storeFields: ['caso', 'resumen', 'fecha', 'filename', 'articulos', 'pais', 'numero_serie', 'tipo_documento', 'tipo_sentencia'],
+        storeFields: ['caso', 'resumen', 'fecha', 'filename', 'articulos', 'pais', 'numero_serie', 'tipo_documento', 'tipo_sentencia', 'casos_relacionados'],
         searchOptions: {
           boost: { caso: 10 },
           combineWith: 'AND',
