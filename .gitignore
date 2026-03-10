@@ -2,3 +2,4 @@ node_modules
 /data
 /data.json
 /4-web/public/data.json.gz
+4-web/public/texts/
